@@ -12,9 +12,10 @@
   <h1>Assistente de Voz GPT</h1>
   <p id="status">Diga "olá GPT" para começar</p>
   <p id="response"></p>
+  <p id="chave">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</p>
 
   <script>
-    const API_KEY = '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';
+    const API_KEY = document.getElementById('chave');
     const ativador = "olá gpt";
 
     let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
