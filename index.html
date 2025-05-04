@@ -16,14 +16,14 @@
 <button onclick="mostrarValor()">Mostrar Valor</button></p>
 
   <script>
-    let API_KEY = "";
+    let api_key = "";
     
     function mostrarValor() {
       let campo = document.getElementById("meuCampo");
       let valor = campo.value;
       console.log(valor); // O valor digitado no campo será exibido no console
-      API_KEY = valor;
-      alert(API_KEY);
+      api_key = valor;
+      console.log(api_key);
     }
     const ativador = "olá gpt";
 
@@ -88,7 +88,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + API_KEY
+          'Authorization': 'Bearer ' + api_key
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
