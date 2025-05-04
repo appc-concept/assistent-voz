@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Assistente de Voz GPT</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2em; }
+    button { padding: 1em; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <h1>Assistente de Voz GPT</h1>
+  <p id="status">Diga "olá GPT" para começar</p>
+  <p id="response"></p>
+
+  <script>
+    const API_KEY = 'SUA_CHAVE_OPENAI_AQUI';
+    const ativador = "olá gpt";
+
+    let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    let perguntaAtual = '';
+    let silencioTimer = null;
+
+    recognition.onresult = async (event) => {
+      const resultado = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+      console.log("Você disse:", resultado);
+
+      if (resultado.includes(ativador)) {
+        document.getElementById('status').textContent = 'Ativador detectado! Fale sua pergunta...';
+        recognition.stop();
+        setTimeout(() => ouvirPergunta(), 500);
+      }
+    };
+
+    function ouvirPergunta() {
+      let novaEscuta = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      novaEscuta.lang = 'pt-BR';
+      novaEscuta.interimResults = true;
+      novaEscuta.start();
+
+      perguntaAtual = '';
+      let ultimaFala = Date.now();
+
+      novaEscuta.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          interim += event.results[i][0].transcript;
+        }
+
+        perguntaAtual = interim.trim();
+        document.getElementById('status').textContent = 'Ouvindo... (' + perguntaAtual + ')';
+        ultimaFala = Date.now();
+
+        // Reinicia o timer de silêncio
+        if (silencioTimer) clearTimeout(silencioTimer);
+        silencioTimer = setTimeout(async () => {
+          novaEscuta.stop();
+          document.getElementById('status').textContent = 'Processando pergunta...';
+          const resposta = await sendToChatGPT(perguntaAtual);
+          document.getElementById('response').textContent = resposta;
+          speak(resposta);
+          recognition.start(); // Volta para escutar a hotword
+        }, 2000); // 2 segundos de silêncio
+      };
+
+      novaEscuta.onerror = () => {
+        document.getElementById('status').textContent = 'Erro ao ouvir a pergunta.';
+        recognition.start();
+      };
+    }
+
+    function sendToChatGPT(message) {
+      return fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + API_KEY
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: message }],
+        })
+      })
+      .then(response => response.json())
+      .then(data => data.choices[0].message.content.trim());
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      speechSynthesis.speak(utterance);
+    }
+
+    recognition.start();
+  </script>
+</body>
+</html>
