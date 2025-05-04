@@ -12,10 +12,19 @@
   <h1>Assistente de Voz GPT</h1>
   <p id="status">Diga "olá GPT" para começar</p>
   <p id="response"></p>
-  <p id="chave"></p>
+  <p id="chave"><input type="text" id="meuCampo" />
+<button onclick="mostrarValor()">Mostrar Valor</button></p>
 
   <script>
-    const API_KEY = "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";
+    const API_KEY = "";
+    
+    function mostrarValor() {
+      let campo = document.getElementById("meuCampo");
+      let valor = campo.value;
+      console.log(valor); // O valor digitado no campo será exibido no console
+      API_KEY = valor;
+      alert(API_KEY);
+    }
     const ativador = "olá gpt";
 
     let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
